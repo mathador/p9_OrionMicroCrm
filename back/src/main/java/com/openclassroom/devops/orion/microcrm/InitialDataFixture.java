@@ -12,10 +12,10 @@ import ro.polak.springboot.datafixtures.DataFixtureSet;
 public class InitialDataFixture implements DataFixture {
 
     @Autowired
-    private final PersonRepository personRepository = null;
+    private PersonRepository personRepository;
 
     @Autowired
-    private final OrganizationRepository organizationRepository = null;
+    private OrganizationRepository organizationRepository;
 
     @Override
     public boolean canBeLoaded() {

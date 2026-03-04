@@ -6,15 +6,17 @@ WORKDIR /src
 
 RUN npm ci \
     && npx @angular/cli build --optimization
+FROM gradle:8.7-jdk17 as back-build
 
-FROM gradle:jdk17 as back-build
-
-COPY ./back /src
+USER root
 
 WORKDIR /src
 
-RUN ./gradlew build
+COPY ./back /src
 
+RUN gradle -v
+RUN ls -la /src
+RUN gradle build -x test --info --no-daemon
 FROM alpine:3.19 as front
 
 COPY --from=front-build /src/dist/microcrm/browser /app/front
@@ -37,19 +39,24 @@ RUN apk add openjdk21-jre-headless
 
 WORKDIR /app
 
-EXPOSE 4200
+EXPOSE 8080
 
 CMD ["java", "-jar", "/app/back/microcrm-0.0.1-SNAPSHOT.jar"]
 
 FROM alpine:3.19 as standalone
 
-COPY --from=front / /
-COPY --from=back / /
+RUN apk add openjdk21-jre-headless supervisor caddy
+
+COPY --from=front /app/front /app/front
+COPY --from=front /app/Caddyfile /app/Caddyfile
+COPY --from=back /app/back /app/back
 COPY misc/docker/supervisor.ini /app/supervisor.ini
 
-RUN apk add supervisor
-
 WORKDIR /app
+
+EXPOSE 80
+EXPOSE 443
+EXPOSE 8080
 
 CMD ["/usr/bin/supervisord", "-c", "/app/supervisor.ini"]
 
