@@ -31,11 +31,17 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Run backend tests
+      - name: Run backend tests and generate coverage
         working-directory: back
         run: |
           chmod +x ./gradlew
-          ./gradlew clean test --no-daemon
+          ./gradlew clean test jacocoTestReport --no-daemon
+
+      - name: Upload backend coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-coverage-report
+          path: back/build/reports/jacoco/test
 
   frontend:
     name: Frontend Angular build + tests
@@ -57,7 +63,13 @@ jobs:
         working-directory: front
         run: npm ci
 
-      - name: Run frontend tests
+      - name: Run frontend tests and generate coverage
         working-directory: front
         run: |
           npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+
+      - name: Upload frontend coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage-report
+          path: front/coverage
