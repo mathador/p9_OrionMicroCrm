@@ -44,15 +44,15 @@ jobs:
           path: back/build/reports/jacoco/test
 
       - name: SonarCloud Scan for Backend
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: back
           args: >
-            -Dsonar.projectKey=votre-cle-projet-backend
-            -Dsonar.organization=votre-organisation
+            -Dsonar.projectKey=p9-orion-backend
+            -Dsonar.organization=mathador-1
             -Dsonar.java.binaries=build/classes/java/main
             -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
 
@@ -88,13 +88,13 @@ jobs:
           path: front/coverage
 
       - name: SonarCloud Scan for Frontend
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: front
           args: >
-            -Dsonar.projectKey=votre-cle-projet-frontend
-            -Dsonar.organization=votre-organisation
+            -Dsonar.projectKey=p9-orion-frontend
+            -Dsonar.organization=mathador-1
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
