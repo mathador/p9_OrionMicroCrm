@@ -88,6 +88,6 @@ jobs:
         with:
           projectBaseDir: front
           args: >
-            -Dsonar.projectKey=p9_OrionMicroCrm
+            -Dsonar.projectKey=mathador_p9_OrionMicroCrm
             -Dsonar.organization=mathador-1
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
