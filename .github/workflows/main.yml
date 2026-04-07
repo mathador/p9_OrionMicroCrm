@@ -47,7 +47,7 @@ jobs:
         working-directory: back
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonarqube --no-daemon
+        run: ./gradlew -Dsonar.branch.name=main sonar --no-daemon
 
   frontend:
     name: Frontend Angular build + tests
