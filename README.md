@@ -119,7 +119,8 @@ back\build\reports\tests\test\index.html
 ##### Construire l'image
 
 ```shell
-docker build --target front -t orion-microcrm-front:latest .
+cd front
+docker build -t orion-microcrm-front:latest .
 ```
 
 ##### Exécuter l'image
@@ -135,7 +136,8 @@ L'application sera disponible sur https://localhost.
 ##### Construire l'image
 
 ```shell
-docker build --target back -t orion-microcrm-back:latest .
+cd back
+docker build -t orion-microcrm-back:latest .
 ```
 
 ##### Exécuter l'image
@@ -146,10 +148,19 @@ docker run -it --rm -p 8080:8080 orion-microcrm-back:latest
 
 L'API sera disponible sur http://localhost:8080.
 
-#### Tout en un
+#### Déploiement séparé
+
+Les images frontend et backend peuvent être construites dans leurs projets respectifs (`front/` et `back/`).
+
+#### Build tout-en-un
+
+Ce dépôt fournit aussi un Dockerfile racine qui compile le frontend et le backend, puis assemble les deux services dans une seule image.
+
+##### Construire l'image
 
 ```shell
-docker build --target standalone -t orion-microcrm-standalone:latest .
+cd /
+docker build -t orion-microcrm-standalone:latest .
 ```
 
 ##### Exécuter l'image
