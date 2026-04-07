@@ -43,6 +43,19 @@ jobs:
           name: backend-coverage-report
           path: back/build/reports/jacoco/test
 
+      - name: SonarCloud Scan for Backend
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: back
+          args: >
+            -Dsonar.projectKey=votre-cle-projet-backend
+            -Dsonar.organization=votre-organisation
+            -Dsonar.java.binaries=build/classes/java/main
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+
   frontend:
     name: Frontend Angular build + tests
     runs-on: ubuntu-latest
@@ -73,3 +86,15 @@ jobs:
         with:
           name: frontend-coverage-report
           path: front/coverage
+
+      - name: SonarCloud Scan for Frontend
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: front
+          args: >
+            -Dsonar.projectKey=votre-cle-projet-frontend
+            -Dsonar.organization=votre-organisation
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
