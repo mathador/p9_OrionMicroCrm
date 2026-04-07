@@ -51,7 +51,7 @@ jobs:
         with:
           projectBaseDir: back
           args: >
-            -Dsonar.projectKey=p9-orion-backend
+            -Dsonar.projectKey=p9_OrionMicroCrm
             -Dsonar.organization=mathador-1
             -Dsonar.java.binaries=build/classes/java/main
             -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
@@ -95,6 +95,6 @@ jobs:
         with:
           projectBaseDir: front
           args: >
-            -Dsonar.projectKey=p9-orion-frontend
+            -Dsonar.projectKey=p9_OrionMicroCrm
             -Dsonar.organization=mathador-1
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
