@@ -44,17 +44,11 @@ jobs:
           path: back/build/reports/jacoco/test
 
       - name: SonarCloud Scan for Backend
-        uses: sonarsource/sonarcloud-github-action@master
+        working-directory: back
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: back
-          args: >
-            -Dsonar.projectKey=mathador_p9_OrionMicroCrm
-            -Dsonar.organization=oc-projet9
-            -Dsonar.java.binaries=build/classes/java/main
-            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml
+        run: ./gradlew sonar --no-daemon
 
   frontend:
     name: Frontend Angular build + tests
@@ -88,7 +82,7 @@ jobs:
           path: front/coverage
 
       - name: SonarCloud Scan for Frontend
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
