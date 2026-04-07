@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - back
+    networks:
+      - microcrm-network
+
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - microcrm-network
+
+networks:
+  microcrm-network:
+    driver: bridge

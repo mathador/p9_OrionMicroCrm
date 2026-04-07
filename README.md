@@ -152,21 +152,25 @@ L'API sera disponible sur http://localhost:8080.
 
 Les images frontend et backend peuvent être construites dans leurs projets respectifs (`front/` et `back/`).
 
-#### Build tout-en-un
+#### Déploiement avec Docker Compose
 
-Ce dépôt fournit aussi un Dockerfile racine qui compile le frontend et le backend, puis assemble les deux services dans une seule image.
+Ce dépôt fournit un `docker-compose.yml` qui orchestre le build et le lancement des services frontend et backend.
 
-##### Construire l'image
+##### Démarrer les services
 
 ```shell
-cd /
-docker build -t orion-microcrm-standalone:latest .
+docker-compose up --build
 ```
 
-##### Exécuter l'image
-
+ou si le build a déjà été effectué:
 ```shell
-docker run -it --rm -p 8080:8080 -p 80:80 -p 443:443 orion-microcrm-standalone:latest
+docker-compose up -d
 ```
 
 L'application sera disponible sur https://localhost et l'API sur http://localhost:8080.
+
+##### Arrêter les services
+
+```shell
+docker-compose down
+```
