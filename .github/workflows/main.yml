@@ -164,3 +164,20 @@ jobs:
           cache-from: type=gha          # Utiliser le cache GitHub Actions
           cache-to: type=gha,mode=max   # Sauvegarder le cache
           platforms: linux/amd64,linux/arm64  # Support multi-architecture
+
+      # Rendre le package Docker public sur GitHub Container Registry
+      - name: Make Docker image public
+        run: |
+          # Authentifier gh CLI avec le token (sans l'exposer dans les logs)
+          gh auth login --with-token <<< "${{ secrets.CR_PAT }}"
+
+          # Attendre que le package soit créé
+          sleep 10
+
+          # Rendre le package public
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /user/packages/container/microcrm/visibility \
+            -f visibility='public' || echo "Package déjà public ou erreur API"
+

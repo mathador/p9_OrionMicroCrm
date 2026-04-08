@@ -1,6 +1,15 @@
 
 #### Configuration du déploiement CI/CD
 
+##### ⚠️ Sécurité importante
+
+**Ne jamais exposer les secrets dans les logs !**
+
+- ❌ **DANGEREUX** : `echo "${{ secrets.MY_SECRET }}"` → Visible dans les logs
+- ✅ **SÉCURISÉ** : `gh auth login --with-token <<< "${{ secrets.MY_SECRET }}"` → Invisible dans les logs
+
+Les logs GitHub Actions sont visibles par tous les contributeurs. Si le repository est public, ils sont visibles par tout internet !
+
 ##### Création d'un Personal Access Token (PAT)
 
 Pour permettre au workflow GitHub Actions de publier des images Docker sur GitHub Container Registry, vous devez créer un Personal Access Token avec les permissions appropriées :

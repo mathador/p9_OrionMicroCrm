@@ -152,14 +152,14 @@ L'API sera disponible sur http://localhost:8080.
 
 ##### Récupérer l'image depuis GitHub Container Registry
 
-L'image combinée est automatiquement construite et publiée via le CI/CD GitHub Actions lors des pushes sur la branche `main`.
+L'image combinée est automatiquement construite et publiée via le CI/CD GitHub Actions lors des pushes sur la branche `main`. L'image est automatiquement rendue **publique** pour faciliter l'accès.
 
 ```shell
 # Récupérer la dernière version
-docker pull ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+docker pull ghcr.io/mathador/p9_orionmicrocrm/microcrm:latest
 
 # Ou récupérer une version spécifique par commit/tag
-docker pull ghcr.io/mathador/p9-orionmicrocrm/microcrm:main-<commit-sha>
+docker pull ghcr.io/mathador/p9_orionmicrocrm/microcrm:main-<commit-sha>
 ```
 
 ##### Lancer l'application complète
@@ -170,7 +170,7 @@ docker run -d \
   --name microcrm-app \
   -p 80:80 \
   -p 443:443 \
-  ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+  ghcr.io/mathador/p9_orionmicrocrm/microcrm:latest
 ```
 
 L'application sera alors accessible :
@@ -228,10 +228,10 @@ docker-compose down
 
 # Récupérer l'image
 ```shell
-docker pull ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+docker pull ghcr.io/mathador/p9_orionmicrocrm/microcrm:latest
 ```
 
 # Lancer l'application
 ```shell
-docker run -d --name microcrm-app -p 80:80 -p 443:443 ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+docker run -d --name microcrm-app -p 80:80 -p 443:443 ghcr.io/mathador/p9_orionmicrocrm/microcrm:latest
 ```
