@@ -3,4 +3,10 @@
 	encode gzip
 	try_files {path} /index.html
 	file_server
+
+	# Proxy vers le backend Spring Boot
+	handle /api/* {
+		uri strip_prefix /api
+		reverse_proxy localhost:8080
+	}
 }

@@ -1,26 +1,36 @@
+# Workflow CI/CD pour l'application MicroCRM
+# Intègre les tests, analyses de qualité et déploiement automatique
 name: CI
 
+# Déclencheurs du workflow :
+# - Push sur la branche main
+# - Pull Request vers la branche main
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
+# Définition des jobs (tâches) à exécuter
 jobs:
+  # Job de test et build du backend Java/Spring Boot
   backend:
     name: Backend Gradle build + tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Exécution sur Ubuntu dernière version
 
     steps:
+      # Récupération du code source depuis le repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Configuration de l'environnement Java
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
+          distribution: temurin  # Utilisation d'Eclipse Temurin (OpenJDK)
           java-version: '17'
 
+      # Mise en cache des dépendances Gradle pour accélérer les builds
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -31,64 +41,128 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      # Exécution des tests unitaires et génération des rapports de couverture
       - name: Run backend tests and generate coverage
-        working-directory: back
+        working-directory: back  # Exécution dans le répertoire backend
         run: |
-          chmod +x ./gradlew
-          ./gradlew clean test jacocoTestReport --no-daemon
+          chmod +x ./gradlew  # Rendre le script Gradle exécutable
+          ./gradlew clean test jacocoTestReport --no-daemon  # Tests + couverture JaCoCo
 
+      # Upload des rapports de couverture pour visualisation dans GitHub
       - name: Upload backend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-report
           path: back/build/reports/jacoco/test
 
+      # Analyse de qualité du code avec SonarCloud
       - name: SonarCloud Scan for Backend
         working-directory: back
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar --no-daemon
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token GitHub pour l'intégration
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Token SonarCloud pour l'analyse
+        run: ./gradlew sonar --no-daemon  # Exécution de l'analyse SonarQube
 
+  # Job de test et build du frontend Angular
   frontend:
     name: Frontend Angular build + tests
     runs-on: ubuntu-latest
-    needs: backend
+    needs: backend  # Attend que le job backend soit terminé avec succès
 
     steps:
+      # Récupération du code source
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Configuration de Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '20'  # Version de Node.js
+          cache: 'npm'        # Mise en cache des dépendances npm
           cache-dependency-path: 'front/package-lock.json'
 
+      # Installation des dépendances npm
       - name: Install frontend dependencies
         working-directory: front
-        run: npm ci
+        run: npm ci  # Installation propre (plus rapide que npm install)
 
+      # Exécution des tests unitaires Angular avec couverture
       - name: Run frontend tests and generate coverage
         working-directory: front
         run: |
           npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+          # --watch=false : pas de surveillance continue
+          # --browsers=ChromeHeadless : navigateur headless pour CI
+          # --code-coverage : génération des rapports de couverture
 
+      # Upload des rapports de couverture frontend
       - name: Upload frontend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-report
           path: front/coverage
 
+      # Analyse SonarCloud pour le frontend
       - name: SonarCloud Scan for Frontend
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          projectBaseDir: front
+          projectBaseDir: front  # Répertoire du projet frontend
           args: >
-            -Dsonar.projectKey=mathador_p9_OrionMicroCrm
-            -Dsonar.organization=oc-projet9
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.projectKey=mathador_p9_OrionMicroCrm  # Clé du projet SonarCloud
+            -Dsonar.organization=oc-projet9               # Organisation SonarCloud
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info  # Rapport de couverture
+
+  # Étape de déploiement continu (CD) - Construction et publication de l'image Docker combinée
+  # Cette étape ne s'exécute que sur les pushes vers main (pas sur les PR)
+  deploy:
+    name: Build and Deploy Combined Docker Image
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]  # Dépend des jobs de test backend et frontend
+    # Condition : uniquement sur push vers main, pas sur les pull requests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      # Récupération du code source complet
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Configuration de Docker Buildx pour le multi-plateforme
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Authentification auprès du GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io  # GitHub Container Registry
+          username: ${{ github.actor }}      # Utilisateur GitHub actuel
+          password: ${{ secrets.GITHUB_TOKEN }}  # Token automatique GitHub
+
+      # Extraction des métadonnées pour le tagging automatique des images
+      - name: Extract metadata for Docker image
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/microcrm  # Nom de l'image
+          tags: |
+            type=ref,event=branch          # Tag avec le nom de la branche
+            type=ref,event=pr              # Tag pour les PR
+            type=sha,prefix={{branch}}-    # Tag avec le SHA du commit
+            type=raw,value=latest,enable={{is_default_branch}}  # Tag 'latest' sur main
+
+      # Construction et publication de l'image Docker multi-plateforme
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .                    # Contexte de build (racine du repo)
+          file: ./Dockerfile            # Dockerfile à utiliser
+          push: true                    # Publier l'image après le build
+          tags: ${{ steps.meta.outputs.tags }}      # Tags générés automatiquement
+          labels: ${{ steps.meta.outputs.labels }}   # Labels pour l'image
+          cache-from: type=gha          # Utiliser le cache GitHub Actions
+          cache-to: type=gha,mode=max   # Sauvegarder le cache
+          platforms: linux/amd64,linux/arm64  # Support multi-architecture

@@ -148,6 +148,55 @@ docker run -it --rm -p 8080:8080 orion-microcrm-back:latest
 
 L'API sera disponible sur http://localhost:8080.
 
+#### Application complète (Front + Back)
+
+##### Récupérer l'image depuis GitHub Container Registry
+
+L'image combinée est automatiquement construite et publiée via le CI/CD GitHub Actions lors des pushes sur la branche `main`.
+
+```shell
+# Récupérer la dernière version
+docker pull ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+
+# Ou récupérer une version spécifique par commit/tag
+docker pull ghcr.io/mathador/p9-orionmicrocrm/microcrm:main-<commit-sha>
+```
+
+##### Lancer l'application complète
+
+```shell
+# Lancer l'application sur les ports 80 (HTTP) et 443 (HTTPS)
+docker run -d \
+  --name microcrm-app \
+  -p 80:80 \
+  -p 443:443 \
+  ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+```
+
+L'application sera alors accessible :
+- **Frontend** : http://localhost (ou https://localhost pour HTTPS)
+- **API Backend** : http://localhost:8080/api (accessible via le proxy du frontend)
+
+##### Arrêter l'application
+
+```shell
+# Arrêter le conteneur
+docker stop microcrm-app
+
+# Supprimer le conteneur
+docker rm microcrm-app
+```
+
+##### Logs et débogage
+
+```shell
+# Voir les logs des deux services (backend + frontend)
+docker logs microcrm-app
+
+# Accéder au conteneur en cours d'exécution
+docker exec -it microcrm-app /bin/bash
+```
+
 #### Déploiement séparé
 
 Les images frontend et backend peuvent être construites dans leurs projets respectifs (`front/` et `back/`).
