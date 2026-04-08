@@ -109,12 +109,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: mathador_p9_OrionMicroCrm
+          SONAR_ORGANIZATION: oc-projet9
+          SONAR_JAVASCRIPT_LCOV_REPORTPATHS: coverage/lcov.info
         with:
           projectBaseDir: front  # Répertoire du projet frontend
-          args: |
-            -Dsonar.projectKey=mathador_p9_OrionMicroCrm
-            -Dsonar.organization=oc-projet9
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
   # Étape de déploiement continu (CD) - Construction et publication de l'image Docker combinée
   # Cette étape ne s'exécute que sur les pushes vers main (pas sur les PR)
