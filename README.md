@@ -223,3 +223,15 @@ L'application sera disponible sur https://localhost et l'API sur http://localhos
 ```shell
 docker-compose down
 ```
+
+### Image en production
+
+# Récupérer l'image
+```shell
+docker pull ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+```
+
+# Lancer l'application
+```shell
+docker run -d --name microcrm-app -p 80:80 -p 443:443 ghcr.io/mathador/p9-orionmicrocrm/microcrm:latest
+```

@@ -8,8 +8,21 @@ RUN gradle build -x test --no-daemon
 # Stage 2: Build du frontend Angular
 FROM node:20-alpine AS frontend-build
 WORKDIR /src
+
+# Copier d'abord les fichiers de dépendances pour tirer parti du cache Docker
+COPY front/package*.json ./
+
+# Configuration npm plus tolérante en cas de réseau instable
+RUN npm config set registry "https://registry.npmjs.org/" && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-factor 2 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm ci --prefer-offline --no-audit --progress=false
+
+# Copier le code source du frontend après installation des dépendances
 COPY front/ .
-RUN npm ci && npx @angular/cli build --optimization
+RUN npx @angular/cli build --optimization
 
 # Stage 3: Image de production combinée
 FROM eclipse-temurin:17-jre-jammy AS runtime
