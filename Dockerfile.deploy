@@ -4,7 +4,7 @@
 
 FROM caddy:2-alpine AS caddy-stage
 
-FROM eclipse-temurin:17-jre-jammy AS runtime
+FROM eclipse-temurin:17-jre-alpine AS runtime
 
 # Copier Caddy depuis l'image officielle (plus fiable que l'installation manuelle)
 COPY --from=caddy-stage /usr/bin/caddy /usr/bin/caddy
@@ -20,14 +20,13 @@ COPY frontend-dist/ /app/front
 # Configuration Caddy pour servir le frontend et proxy vers le backend
 COPY front/Caddyfile /etc/caddy/Caddyfile
 
-# Installation de supervisor
-RUN apt-get update && apt-get install -y supervisor && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Installation de supervisor (via apk pour eviter les erreurs dpkg/qemu en arm64)
+RUN apk add --no-cache supervisor
 
-COPY docker/supervisor.ini /etc/supervisor/conf.d/microcrm.conf
+COPY docker/supervisor.ini /etc/supervisor.ini
 
 # Exposition des ports
 EXPOSE 80 443 8080
 
-# Commande de démarrage avec supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+# Commande de demarrage avec supervisor
+CMD ["supervisord", "-c", "/etc/supervisor.ini"]
