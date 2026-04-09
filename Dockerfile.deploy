@@ -1,0 +1,35 @@
+# Dockerfile pour deployment avec artifacts pré-compilés
+# Utilisé uniquement dans le pipeline CI/CD après tests et builds réussis
+# Garantit que le code testé est exactement ce qui est déployé
+
+FROM eclipse-temurin:17-jre-jammy AS runtime
+
+# Installation de Caddy pour servir le frontend
+RUN apt-get update && apt-get install -y curl && \
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg && \
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list && \
+    apt-get update && apt-get install -y caddy && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Création des répertoires de travail
+WORKDIR /app
+
+# Copie des artifacts pré-compilés depuis le contexte de build
+# Ces fichiers sont téléchargés depuis les artifacts du workflow CI/CD
+COPY backend.jar /app/backend.jar
+COPY frontend-dist/ /app/front
+
+# Configuration Caddy pour servir le frontend et proxy vers le backend
+COPY front/Caddyfile /etc/caddy/Caddyfile
+
+# Installation de supervisor
+RUN apt-get update && apt-get install -y supervisor && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY docker/supervisor.ini /etc/supervisor/conf.d/microcrm.conf
+
+# Exposition des ports
+EXPOSE 80 443 8080
+
+# Commande de démarrage avec supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

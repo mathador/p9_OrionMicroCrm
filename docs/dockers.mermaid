@@ -5,31 +5,42 @@ flowchart TD
     A --> D[Job deploy]
 
     B --> B1[Gradle test + coverage]
+    B1 --> B2[Gradle build JAR]
+    B2 --> B3["Upload artifact: backend.jar"]
+    B3 --> B4["⬆️ backend-jar"]
+
     C --> C1[Angular test]
+    C1 --> C2[Angular build dist]
+    C2 --> C3["Upload artifact: dist/"]
+    C3 --> C4["⬆️ frontend-dist"]
 
-    B1 -. artefacts jetés .-> X[(Aucun usage)]
-    C1 -. artefacts jetés .-> X
+    D --> D1["Download: backend.jar"]
+    D --> D2["Download: frontend-dist"]
+    D1 --> D3["Prepare build context"]
+    D2 --> D3
 
-    D --> E[docker build]
+    D3 --> E["docker build -f Dockerfile.deploy"]
 
-    E --> F[Dockerfile combiné]
+    E --> F[Dockerfile.deploy]
 
-    F --> G[Stage backend-build]
-    G --> G1[gradle build]
-    G1 --> G2["/src/build/libs/*.jar"]
+    F --> G["FROM eclipse-temurin:17-jre"]
+    G --> H["Install Caddy + Supervisor"]
+    H --> I["COPY backend.jar"]
+    H --> J["COPY frontend-dist"]
 
-    F --> H[Stage frontend-build]
-    H --> H1[npm ci + ng build]
-    H1 --> H2["/src/dist/microcrm/browser"]
+    I --> K["Image finale"]
+    J --> K
 
-    F --> I[Image finale]
+    K --> L[Supervisor]
+    L --> M["Java -jar backend.jar"]
+    L --> N["Caddy"]
 
-    G2 -->|COPY| I1["/app/backend.jar"]
-    H2 -->|COPY| I2["/app/front"]
+    N --> O["Serve frontend"]
+    N --> P["Proxy -> backend:8080"]
 
-    I --> J[Supervisor]
-    J --> K[Java -jar backend.jar]
-    J --> L[Caddy]
-
-    L --> M[Serve /app/front]
-    L --> N[Proxy -> backend:8080]
+    style B3 fill:#90EE90
+    style C3 fill:#90EE90
+    style D1 fill:#87CEEB
+    style D2 fill:#87CEEB
+    style E fill:#FFD700
+    style F fill:#FFA500

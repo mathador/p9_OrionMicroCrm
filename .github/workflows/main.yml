@@ -48,12 +48,25 @@ jobs:
           chmod +x ./gradlew  # Rendre le script Gradle exécutable
           ./gradlew clean test jacocoTestReport --no-daemon  # Tests + couverture JaCoCo
 
+      # Build du backend (JAR)
+      - name: Build backend JAR
+        working-directory: back
+        run: ./gradlew build -x test --no-daemon
+
       # Upload des rapports de couverture pour visualisation dans GitHub
       - name: Upload backend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-report
           path: back/build/reports/jacoco/test
+
+      # Upload du JAR compilé pour utilisation dans le deploy
+      - name: Upload backend JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: back/build/libs/microcrm-0.0.1-SNAPSHOT.jar
+          retention-days: 1  # Garder seulement 1 jour, c'est temporaire
 
       # Analyse de qualité du code avec SonarCloud
       - name: SonarCloud Scan for Backend
@@ -103,6 +116,19 @@ jobs:
           name: frontend-coverage-report
           path: front/coverage
 
+      # Build du frontend (dist)
+      - name: Build frontend Angular
+        working-directory: front
+        run: npx @angular/cli build --optimization
+
+      # Upload de la dist compilée pour utilisation dans le deploy
+      - name: Upload frontend dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: front/dist/microcrm/browser
+          retention-days: 1  # Garder seulement 1 jour, c'est temporaire
+
       # Analyse SonarCloud pour le frontend
       - name: SonarCloud Scan for Frontend
         uses: SonarSource/sonarqube-scan-action@v5.0.0
@@ -126,6 +152,26 @@ jobs:
       # Récupération du code source complet
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # Téléchargement du JAR backend compilé
+      - name: Download backend JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: ./backend-artifacts
+
+      # Téléchargement de la dist frontend compilée
+      - name: Download frontend dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: ./frontend-artifacts
+
+      # Préparation du contexte de build avec les artifacts
+      - name: Prepare Docker build context
+        run: |
+          cp ./backend-artifacts/microcrm-0.0.1-SNAPSHOT.jar ./backend.jar
+          cp -r ./frontend-artifacts ./frontend-dist
 
       # Configuration de Docker Buildx pour le multi-plateforme
       - name: Set up Docker Buildx
@@ -153,11 +199,12 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}  
 
       # Construction et publication de l'image Docker multi-plateforme
-      - name: Build and push Docker image
+      # Utilise les artifacts pré-compilés au lieu de recompiler
+      - name: Build and push Docker image from pre-compiled artifacts
         uses: docker/build-push-action@v5
         with:
           context: .                    # Contexte de build (racine du repo)
-          file: ./Dockerfile            # Dockerfile à utiliser
+          file: ./Dockerfile.deploy     # Dockerfile optimisé pour le deploy
           push: true                    # Publier l'image après le build
           tags: ${{ steps.meta.outputs.tags }}      # Tags générés automatiquement
           labels: ${{ steps.meta.outputs.labels }}   # Labels pour l'image
