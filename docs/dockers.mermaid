@@ -1,46 +1,53 @@
 flowchart TD
 
     A[GitHub Actions CI] --> B[Job backend]
-    A --> C[Job frontend]
-    A --> D[Job deploy]
+    B --> C[Job frontend]
+    C --> D[Job deploy]
+    B --> D
 
-    B --> B1[Gradle test + coverage]
-    B1 --> B2[Gradle build JAR]
-    B2 --> B3["Upload artifact: backend.jar"]
-    B3 --> B4["⬆️ backend-jar"]
+    subgraph Backend [Pipeline Backend]
+        B1[Gradle test + coverage] --> B2[Gradle build JAR]
+        B2 --> B3["Upload artifact: backend-jar"]
+        B2 --> B5["SonarCloud Scan Backend"]
+    end
+    B --> B1
 
-    C --> C1[Angular test]
-    C1 --> C2[Angular build dist]
-    C2 --> C3["Upload artifact: dist/"]
-    C3 --> C4["⬆️ frontend-dist"]
+    subgraph Frontend [Pipeline Frontend]
+        C1[Angular test + coverage] --> C2[Angular build dist]
+        C2 --> C3["Upload artifact: frontend-dist"]
+        C2 --> C5["SonarCloud Scan Frontend"]
+    end
+    C --> C1
 
-    D --> D1["Download: backend.jar"]
-    D --> D2["Download: frontend-dist"]
-    D1 --> D3["Prepare build context"]
-    D2 --> D3
-
-    D3 --> E["docker build -f Dockerfile.deploy"]
+    subgraph Deploy [Pipeline Deploy]
+        D1["Download artifacts"] --> D3["Prepare build context"]
+        D3 --> E["docker build & push (GHCR)"]
+    end
+    D --> D1
 
     E --> F[Dockerfile.deploy]
 
-    F --> G["FROM eclipse-temurin:17-jre"]
-    G --> H["Install Caddy + Supervisor"]
-    H --> I["COPY backend.jar"]
-    H --> J["COPY frontend-dist"]
+    subgraph Container [Conteneur Final]
+        F --> G["FROM eclipse-temurin:17-jre"]
+        G --> H["Install Caddy + Supervisor"]
+        H --> I["COPY backend.jar"]
+        H --> J["COPY frontend-dist"]
 
-    I --> K["Image finale"]
-    J --> K
+        I --> K["Image finale"]
+        J --> K
 
-    K --> L[Supervisor]
-    L --> M["Java -jar backend.jar"]
-    L --> N["Caddy"]
+        K --> L[Supervisor]
+        L --> M["Java -jar backend.jar"]
+        L --> N["Caddy"]
 
-    N --> O["Serve frontend"]
-    N --> P["Proxy -> backend:8080"]
+        N --> O["Serve frontend"]
+        N --> P["Proxy -> backend:8080"]
+    end
 
     style B3 fill:#90EE90
     style C3 fill:#90EE90
     style D1 fill:#87CEEB
-    style D2 fill:#87CEEB
     style E fill:#FFD700
     style F fill:#FFA500
+    style B5 fill:#4e9bcd
+    style C5 fill:#4e9bcd
