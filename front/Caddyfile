@@ -1,15 +1,16 @@
 * {
-	root * /app/front
 	encode gzip
-	try_files {path} /index.html
-	file_server
 
-	# Proxy vers le backend Spring Boot pour toutes les routes API
-	handle /organizations* {
-		reverse_proxy localhost:8080
+	# Les routes API doivent passer AVANT le fallback SPA, sinon index.html est servi.
+	@api path /organizations* /persons*
+	handle @api {
+		reverse_proxy 127.0.0.1:8080
 	}
 
-	handle /persons* {
-		reverse_proxy localhost:8080
+	# Frontend Angular (fallback sur index.html pour le routing client)
+	handle {
+		root * /app/front
+		try_files {path} /index.html
+		file_server
 	}
 }
