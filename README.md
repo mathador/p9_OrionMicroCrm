@@ -152,14 +152,17 @@ L'API sera disponible sur http://localhost:8080.
 
 ##### Récupérer l'image depuis GitHub Container Registry
 
-L'image combinée est automatiquement construite et publiée via le CI/CD GitHub Actions lors des pushes sur la branche `main`. L'image est automatiquement rendue **publique** pour faciliter l'accès.
+L'image combinée est automatiquement construite et publiée via le CI/CD GitHub Actions lors des pushes sur la branche `main`.
+
+**Note** : Par défaut, l'image est créée comme privée. Suivez les instructions dans `docs/how_to.md` pour la rendre publique.
 
 ```shell
-# Récupérer la dernière version
+# Pour une image publique (aucune authentification requise)
 docker pull ghcr.io/mathador/p9_orionmicrocrm/microcrm:latest
 
-# Ou récupérer une version spécifique par commit/tag
-docker pull ghcr.io/mathador/p9_orionmicrocrm/microcrm:main-<commit-sha>
+# Pour une image privée (authentification requise)
+echo $CR_PAT | docker login ghcr.io -u <votre-utilisateur> --password-stdin
+docker pull ghcr.io/mathador/p9_orionmicrocrm/microcrm:latest
 ```
 
 ##### Lancer l'application complète

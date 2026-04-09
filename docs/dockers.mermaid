@@ -1,0 +1,35 @@
+flowchart TD
+
+    A[GitHub Actions CI] --> B[Job backend]
+    A --> C[Job frontend]
+    A --> D[Job deploy]
+
+    B --> B1[Gradle test + coverage]
+    C --> C1[Angular test]
+
+    B1 -. artefacts jetés .-> X[(Aucun usage)]
+    C1 -. artefacts jetés .-> X
+
+    D --> E[docker build]
+
+    E --> F[Dockerfile combiné]
+
+    F --> G[Stage backend-build]
+    G --> G1[gradle build]
+    G1 --> G2["/src/build/libs/*.jar"]
+
+    F --> H[Stage frontend-build]
+    H --> H1[npm ci + ng build]
+    H1 --> H2["/src/dist/microcrm/browser"]
+
+    F --> I[Image finale]
+
+    G2 -->|COPY| I1["/app/backend.jar"]
+    H2 -->|COPY| I2["/app/front"]
+
+    I --> J[Supervisor]
+    J --> K[Java -jar backend.jar]
+    J --> L[Caddy]
+
+    L --> M[Serve /app/front]
+    L --> N[Proxy -> backend:8080]

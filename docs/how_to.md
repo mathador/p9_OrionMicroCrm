@@ -1,4 +1,3 @@
-
 #### Configuration du déploiement CI/CD
 
 ##### ⚠️ Sécurité importante
@@ -34,3 +33,15 @@ Pour permettre au workflow GitHub Actions de publier des images Docker sur GitHu
 5. **Cliquez** : "Add secret"
 
 Le workflow utilisera automatiquement ce token pour s'authentifier auprès de GitHub Container Registry et publier les images Docker.
+
+##### Rendre l'image Docker publique
+
+Par défaut, les packages GitHub Container Registry sont créés comme **privés**. Pour permettre à tout le monde de télécharger l'image sans authentification :
+
+1. **Allez dans votre repository GitHub**
+2. https://github.com/mathador?tab=packages
+3. Cliquez sur le nom du package (![étape 1](Etape_1.png "Cliquez sur packages"))
+4. Cliquez sur package setting (![étape 2](Etape_2.png "Cliquez sur package settings"))
+5. Cliquez sur change visibility (![étape 3](Etape_3.png "Cliquez sur change visibility"))
+
+**Note** : Cette opération n'est possible que si le repository lui-même est public.
