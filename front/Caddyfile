@@ -1,22 +1,15 @@
-:80 {
-    root * /app/front
-    encode gzip
-    # Fallback Angular SPA
-    try_files {path} /index.html
-    file_server
+* {
+	root * /app/front
+	encode gzip
+	try_files {path} /index.html
+	file_server
 
-    # Intercepte les appels Angular vers http://localhost:8080/*
-    @badApi host localhost:8080
-    handle @badApi {
-        reverse_proxy localhost:8080
-    }
+	# Proxy vers le backend Spring Boot pour toutes les routes API
+	handle /organizations* {
+		reverse_proxy localhost:8080
+	}
 
-    # Proxy normal pour les routes API
-    handle_path /organizations/* {
-        reverse_proxy localhost:8080
-    }
-
-    handle_path /persons/* {
-        reverse_proxy localhost:8080
-    }
+	handle /persons* {
+		reverse_proxy localhost:8080
+	}
 }
