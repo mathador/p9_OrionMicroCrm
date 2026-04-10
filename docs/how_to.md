@@ -48,8 +48,7 @@ Par défaut, les packages GitHub Container Registry sont créés comme **privés
 
 ## Trouver les sonars projectKey et organization
 
-
 https://sonarcloud.io/organizations/oc-projet9/projects
 ➡️ Ton organization key = oc-projet9
 C’est toujours la partie juste après /organizations/.
-
+![identifiants sonarcloud](sonarcloud_ids.png "projectKey et organization")
