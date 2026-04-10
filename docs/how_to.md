@@ -45,3 +45,11 @@ Par défaut, les packages GitHub Container Registry sont créés comme **privés
 5. Cliquez sur change visibility (![étape 3](Etape_3.png "Cliquez sur change visibility"))
 
 **Note** : Cette opération n'est possible que si le repository lui-même est public.
+
+## Trouver les sonars projectKey et organization
+
+
+https://sonarcloud.io/organizations/oc-projet9/projects
+➡️ Ton organization key = oc-projet9
+C’est toujours la partie juste après /organizations/.
+

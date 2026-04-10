@@ -15,7 +15,7 @@ on:
 jobs:
   # Job de test et build du backend Java/Spring Boot
   backend:
-    name: Backend Gradle build + tests
+    name: Backend Gradle build + tests + SonarCloud
     runs-on: ubuntu-latest  # Exécution sur Ubuntu dernière version
 
     steps:
@@ -78,7 +78,7 @@ jobs:
 
   # Job de test et build du frontend Angular
   frontend:
-    name: Frontend Angular build + tests
+    name: Frontend Angular build + tests + SonarCloud
     runs-on: ubuntu-latest
     needs: backend  # Attend que le job backend soit terminé avec succès
 
