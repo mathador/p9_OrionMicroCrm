@@ -43,15 +43,16 @@ jobs:
 
       # Exécution des tests unitaires et génération des rapports de couverture
       - name: Run backend tests and generate coverage
-        working-directory: back  # Exécution dans le répertoire backend
         run: |
+          cd back
           chmod +x ./gradlew  # Rendre le script Gradle exécutable
           ./gradlew clean test jacocoTestReport --no-daemon  # Tests + couverture JaCoCo
 
       # Build du backend (JAR)
       - name: Build backend JAR
-        working-directory: back
-        run: ./gradlew build -x test --no-daemon
+        run: |
+          cd back
+          ./gradlew build -x test --no-daemon
 
       # Upload des rapports de couverture pour visualisation dans GitHub
       - name: Upload backend coverage report
@@ -70,11 +71,12 @@ jobs:
 
       # Analyse de qualité du code avec SonarCloud
       - name: SonarCloud Scan for Backend
-        working-directory: back
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token GitHub pour l'intégration
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Token SonarCloud pour l'analyse
-        run: ./gradlew sonar --no-daemon  # Exécution de l'analyse SonarQube
+        run: |
+          cd back
+          ./gradlew sonar --no-daemon  # Exécution de l'analyse SonarQube
 
   # Job de test et build du frontend Angular
   frontend:
